@@ -65,14 +65,12 @@ def main(args: list[str]) -> None:
                concat_ws(',', 'ubio:' || u.namebankID, a.ids) AS nameAlternativeID,
                CAST(t.parentID AS VARCHAR) AS parentID,
                CASE WHEN t.ID IS NOT NULL THEN 'accepted' ELSE 'bare name' END AS status,
-               sci_name(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS scientificName,
-               auth_name(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS authorship,
-               final_rank(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString, false) AS rank,
+               n.nameString AS scientificName,
+               final_rank(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS rank,
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END AS nameReferenceID,
                CASE WHEN t.ID IS NOT NULL THEN c.otherRefs END AS referenceID,
                n.extinct,
-               concat_ws('; ', CASE WHEN t.implied THEN 'parent implied by uBiota ancestry path' END,
-                         CASE WHEN t.inferred THEN 'parent missing in source, inferred from the name' END,
+               concat_ws('; ', t.remarks,
                          cr.remarks) AS remarks
         FROM usage_ids u
         JOIN nm_name n USING (namebankID)
@@ -102,13 +100,12 @@ def main(args: list[str]) -> None:
         FROM v LEFT JOIN nb2.languages l ON l.languageID = v.lang""")
     total, placed = con.execute("""
         SELECT count(*), count(*) FILTER (WHERE placed) FROM (
-            SELECT DISTINCT taxonID, lower(name), language, placed FROM vern)""").fetchone()
+            SELECT DISTINCT taxonID, name, language, placed FROM vern)""").fetchone()
     print(f"  vernacular names: {total:,} distinct, {placed:,} attached to uBiota taxa, "
           f"{total - placed:,} dropped (taxon not in uBiota)", flush=True)
     arc.write(con, "VernacularName", """
-        SELECT DISTINCT ON (taxonID, lower(name), language)
-               CAST(taxonID AS VARCHAR) AS taxonID, name, language
-        FROM vern WHERE placed ORDER BY taxonID, lower(name), language, name""")
+        SELECT DISTINCT CAST(taxonID AS VARCHAR) AS taxonID, name, language
+        FROM vern WHERE placed ORDER BY 1, 2, 3""")
 
     lex_cases = " ".join(f"WHEN {k} THEN '{v}'" for k, v in LEXICAL.items())
     con.execute(f"""

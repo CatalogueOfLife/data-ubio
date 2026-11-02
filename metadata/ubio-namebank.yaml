@@ -49,10 +49,13 @@ contact:
 conversion:
   description: >-
     Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio databases. The uBiota
-    classification (ClassificationBank 104) provides the accepted taxa, after repairing duplicate placements and
-    missing parents. All other NameBank scientific names are added as bare names. Superseded NameBank records are
-    redirected to their current identifier. ColDP requires a vernacular name to be linked to a taxon, so vernacular
-    names are only included for taxa in uBiota. About 810,000 NameBank vernacular names whose scientific name is not
-    part of the uBiota tree were dropped. Misspelling, lexical-variant and basionym groups become name relations,
-    and external database mappings become alternative identifiers.
+    classification (ClassificationBank 104) provides the accepted taxa. Nodes whose parent is not part of uBiota
+    become root taxa, with the source parent given in the remarks. A name placed more than once keeps its first
+    placement, and the other placements are listed in the remarks. All other NameBank scientific names are added as
+    bare names. Superseded NameBank records are redirected to their current identifier. ColDP requires a vernacular
+    name to be linked to a taxon, so vernacular names are only included for taxa in uBiota. About 810,000 NameBank
+    vernacular names whose scientific name is not part of the uBiota tree were dropped. Misspelling, lexical-variant
+    and basionym groups become name relations, and external database mappings become alternative identifiers. The
+    uBio data are represented as verbatim as possible: name strings are passed unchanged for ChecklistBank to parse
+    and nothing is inferred. A uBio rank is only left out when it is unparsable or contradicts the name.
   url: https://github.com/CatalogueOfLife/data-ubio

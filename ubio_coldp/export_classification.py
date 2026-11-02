@@ -101,30 +101,15 @@ def prepare_names(con: duckdb.DuckDBPyConnection) -> None:
         FROM m GROUP BY 1""")
     con.execute("""CREATE OR REPLACE TEMP MACRO name_words(c) AS
         CASE WHEN c IS NULL OR trim(c) = '' THEN NULL ELSE len(string_split(trim(c), ' ')) END""")
-    # rank given by a marker in the original name string
-    con.execute(r"""CREATE OR REPLACE TEMP MACRO marker_rank(ns) AS CASE
-        WHEN regexp_matches(ns, '\s(subsp|ssp)\.?\s') THEN 'subspecies'
-        WHEN regexp_matches(ns, '\svar\.?\s') THEN 'variety'
-        WHEN regexp_matches(ns, '\s(f|fo|forma)\.\s|\sforma\s') THEN 'form' END""")
-    # Final rank: a marker in the name wins; otherwise the given rank if it fits the number of name parts;
-    # trinomials in zoological lists are subspecies; anything uncertain is left out (ChecklistBank infers it).
-    con.execute("""CREATE OR REPLACE TEMP MACRO final_rank(r, c, ns, zoo) AS CASE
-        WHEN marker_rank(ns) IS NOT NULL AND coalesce(name_words(c), 3) >= 3 THEN marker_rank(ns)
-        -- truncated canonical with a single word after it: epithet or author? ("Balæna Mysticetus", "Epiodon Rafinesque")
+    # uBio's rank, left out when uncertain: when it contradicts the number of parts of uBio's canonical form,
+    # or when the canonical form is truncated and a single word follows ("Balæna Mysticetus": epithet or author?)
+    con.execute("""CREATE OR REPLACE TEMP MACRO final_rank(r, c, ns) AS CASE
+        WHEN r IS NULL THEN NULL
         WHEN name_words(c) < rank_level(r) AND starts_with(ns, c || ' ')
              AND name_words(substr(ns, length(c) + 2)) = 1 THEN NULL
-        WHEN r IS NOT NULL AND (name_words(c) IS NULL OR rank_level(r) IS NULL OR rank_level(r) = 3
-                                OR name_words(c) <= rank_level(r)) THEN r
-        WHEN zoo AND name_words(c) = 3 THEN 'subspecies'
+        WHEN name_words(c) IS NULL OR rank_level(r) IS NULL OR rank_level(r) = 3
+             OR name_words(c) <= rank_level(r) THEN r
         END""")
-    # canonical form split off as scientificName, unless it is shorter than the rank implies: NameBank truncated
-    # canonical forms of old names with capitalised epithets (e.g. "Balæna Mysticetus" -> "Balæna")
-    con.execute("""CREATE OR REPLACE TEMP MACRO split_ok(r, c, ns) AS
-        c IS NOT NULL AND c <> '' AND starts_with(ns, c || ' ')
-        AND NOT coalesce(name_words(c) < rank_level(r), false)""")
-    con.execute("CREATE OR REPLACE TEMP MACRO sci_name(r, c, ns) AS CASE WHEN split_ok(r, c, ns) THEN c ELSE ns END")
-    con.execute("""CREATE OR REPLACE TEMP MACRO auth_name(r, c, ns) AS
-        CASE WHEN split_ok(r, c, ns) THEN nullif(trim(substr(ns, length(c) + 2)), '') END""")
     con.execute("""
         CREATE OR REPLACE TEMP TABLE nm_name AS
         SELECT n.namebankID,
@@ -160,84 +145,60 @@ def prepare_names(con: duckdb.DuckDBPyConnection) -> None:
 
 
 def build_tree(con: duckdb.DuckDBPyConnection, cid: int) -> pa.Table:
-    """Return the repaired tree of one classification as (ID, parentID, rankID, implied, inferred).
+    """Return the tree of one classification as (ID, parentID, rankID, remarks), as close to the source as ColDP allows.
 
-    - superseded namebankIDs are replaced by their current ID
-    - names placed more than once keep their first placement (lowest hierarchiesID)
-    - parents missing from the classification are added as implied nodes if the name exists, and every node is
-      attached to its nearest ancestor (from the ancestry path) that exists in the tree
+    - superseded namebankIDs are replaced by their current ID (superseded NameBank records are empty)
+    - a name placed more than once keeps its first placement (lowest hierarchiesID); the other parents go to remarks
+    - a parent that is not part of the classification is not invented: the node becomes a root and the source parent
+      is given in remarks
     """
     rows = con.execute("""
         WITH h AS (
-            SELECT hierarchiesID, cur_id(childID) AS child, cur_id(parentID) AS parent, rankID, ancestry
+            SELECT hierarchiesID, cur_id(childID) AS child, cur_id(parentID) AS parent, rankID
             FROM cb.Hierarchies WHERE _classificationsID = ?)
-        SELECT h.hierarchiesID, h.child, h.parent, h.rankID, h.ancestry, p.namebankID IS NOT NULL AS parent_known
+        SELECT h.hierarchiesID, h.child, h.parent, h.rankID, p.nameString AS parent_name
         FROM h JOIN nm_name c ON c.namebankID = h.child LEFT JOIN nm_name p ON p.namebankID = h.parent
         ORDER BY h.hierarchiesID""", [cid]).fetchall()
     nodes: dict[int, list] = {}
-    known_parent: set[int] = set()
-    for hid, child, parent, rank, ancestry, parent_known in rows:
-        if parent_known:
-            known_parent.add(parent)
+    extra: dict[int, list[str]] = {}
+    for hid, child, parent, rank, parent_name in rows:
+        label = f"{parent_name} ({parent})" if parent_name else str(parent)
         if child in nodes:
+            if parent and parent != nodes[child][0]:
+                extra.setdefault(child, []).append(label)
             continue
-        anc = [int(a) for a in (ancestry or "").split("|") if a.strip().lstrip("-").isdigit() and int(a) != 0]
-        nodes[child] = [parent, rank, anc]
-    implied: dict[int, list[int]] = {}
-    for child, (parent, rank, anc) in nodes.items():
-        if parent and parent not in nodes and parent in known_parent and parent != child:
-            # ancestors of the missing parent: the child's ancestry before the parent
-            pre = anc[: anc.index(parent)] if parent in anc else anc[:-1]
-            implied.setdefault(parent, pre)
-    for p, anc in implied.items():
-        nodes.setdefault(p, [anc[-1] if anc else 0, None, anc + [p]])
-    sup = dict(con.execute("SELECT old, cur FROM nm_sup").fetchall())
-    out_id, out_parent, out_rank, out_implied = [], [], [], []
-    for child, (parent, rank, anc) in nodes.items():
+        nodes[child] = [parent, rank, label]
+    out_id, out_parent, out_rank, out_remarks = [], [], [], []
+    orphans = 0
+    for child, (parent, rank, label) in nodes.items():
+        notes = []
         p = parent if parent in nodes and parent != child else None
-        if p is None:
-            for a in reversed(anc):
-                a = sup.get(a, a)
-                if a != child and a in nodes:
-                    p = a
-                    break
+        if p is None and parent:
+            orphans += 1
+            notes.append(f"source parent not in this classification: {label}")
+        if child in extra:
+            notes.append("also placed in source under: " + "; ".join(extra[child]))
         out_id.append(child)
         out_parent.append(p)
         out_rank.append(rank)
-        out_implied.append(child in implied and rank is None)
-    # roots with a multi-part name: attach to the node named by all but the last part, if it is in the tree
-    # (e.g. "Meliërax gabar" with parentID 0 in the source -> genus Meliërax)
-    con.register("_ids", pa.table({"ID": pa.array(out_id, pa.int64())}))
-    canon = dict(con.execute("""SELECT i.ID, coalesce(nullif(n.canonical, ''), n.nameString)
-                                FROM _ids i JOIN nm_name n ON n.namebankID = i.ID""").fetchall())
-    con.unregister("_ids")
-    by_name: dict[str, int] = {}
-    for node in out_id:
-        by_name.setdefault(canon.get(node, ""), node)
-    out_inferred = [False] * len(out_id)
-    for i, node in enumerate(out_id):
-        words = canon.get(node, "").split()
-        if out_parent[i] is None and len(words) >= 2:
-            pid = by_name.get(" ".join(words[:-1]))
-            if pid is not None and pid != node:
-                out_parent[i] = pid
-                out_inferred[i] = True
-    # break accidental cycles
+        out_remarks.append(notes)
+    # a ColDP tree cannot have cycles
     parent_of = dict(zip(out_id, out_parent))
     for i, node in enumerate(out_id):
         seen, cur = {node}, parent_of[node]
         while cur is not None:
             if cur in seen:
+                out_remarks[i].append(f"source parent {out_parent[i]} removed: cyclic classification")
                 parent_of[node] = None
                 out_parent[i] = None
                 break
             seen.add(cur)
             cur = parent_of.get(cur)
-    print(f"  tree {cid}: {len(rows):,} rows -> {len(out_id):,} nodes ({len(implied):,} implied parents, "
-          f"{sum(out_inferred):,} parents inferred from names)", flush=True)
+    print(f"  tree {cid}: {len(rows):,} rows -> {len(out_id):,} nodes ({orphans:,} with a parent outside the "
+          f"classification, {len(extra):,} placed more than once)", flush=True)
     return pa.table({"ID": pa.array(out_id, pa.int64()), "parentID": pa.array(out_parent, pa.int64()),
-                     "rankID": pa.array(out_rank, pa.int64()), "implied": pa.array(out_implied, pa.bool_()),
-                     "inferred": pa.array(out_inferred, pa.bool_())})
+                     "rankID": pa.array(out_rank, pa.int64()),
+                     "remarks": pa.array(["; ".join(r) or None for r in out_remarks], pa.string())})
 
 
 def register_tree(con: duckdb.DuckDBPyConnection, cid: int, table: str = "tree") -> None:
@@ -323,20 +284,17 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
     con.execute("""CREATE OR REPLACE TEMP MACRO ref_list(a, b) AS
         nullif(array_to_string(list_sort(list_distinct(list_filter(string_split(concat_ws(',', a, b), ','), lambda x: x <> ''))), ','), '')""")
     zoological = cid not in NOT_ZOOLOGICAL
-    zoo = "true" if zoological else "false"
     code = "'zoological'" if zoological else "NULL"
     arc.write(con, "NameUsage", f"""
         SELECT CAST(t.ID AS VARCHAR) AS ID, 'ubio:' || t.ID AS nameAlternativeID,
                CAST(t.parentID AS VARCHAR) AS parentID, 'accepted' AS status,
-               sci_name(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS scientificName,
-               auth_name(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS authorship,
-               final_rank(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString, {zoo}) AS rank,
+               n.nameString AS scientificName,
+               final_rank(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS rank,
                {code} AS code,
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END AS nameReferenceID,
                ref_list(c.otherRefs, sr.refs) AS referenceID,
                n.extinct,
-               concat_ws('; ', CASE WHEN t.implied THEN 'parent implied by uBio ancestry path' END,
-                         CASE WHEN t.inferred THEN 'parent missing in source, inferred from the name' END, er.remarks) AS remarks
+               concat_ws('; ', t.remarks, er.remarks) AS remarks
         FROM tree t JOIN nm_name n ON n.namebankID = t.ID
         LEFT JOIN extra_remarks er ON er.ID = t.ID
         LEFT JOIN nb2.ranks r ON r.rankID = t.rankID
@@ -344,8 +302,8 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
         LEFT JOIN self_refs sr ON sr.ID = t.ID
         UNION ALL
         SELECT 's' || s.synonymsID, 'ubio:' || s.nameID, CAST(s.acceptedID AS VARCHAR), s.status,
-               sci_name(n.rank, n.canonical, n.nameString), auth_name(n.rank, n.canonical, n.nameString),
-               final_rank(n.rank, n.canonical, n.nameString, {zoo}), {code},
+               n.nameString,
+               final_rank(n.rank, n.canonical, n.nameString), {code},
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END,
                ref_list(c.otherRefs, r.refs),
                n.extinct, s.remarks

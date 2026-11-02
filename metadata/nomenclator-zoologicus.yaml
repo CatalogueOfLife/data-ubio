@@ -10,7 +10,7 @@ description: >-
   This archive was generated from the November 2015 uBio database dump. It holds every entry with authority, original
   publication (microcitation) and year, and extinct, homonym, corrigenda and addendum flags.
   Each entry's remarks contain the editor's comment, the taxonomic group and the "see also" cross-references.
-  Replacement names (n.n. pro) and later homonyms are given as name relations.
+  Replacement names (n.n. pro) stated in the comments are given as name relations.
   uBio NameBank identifiers are given as alternative identifiers.
   Record identifiers are the uBio NZ uids, the same as in ChecklistBank dataset 126539. Later online additions are
   prefixed with "a".
@@ -44,8 +44,9 @@ contact:
   country: DE
 conversion:
   description: >-
-    Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio NZ database. Replacement
-    names (n.n. pro) and later homonyms are given as name relations. Spam was filtered out of the anonymous web
+    Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio NZ database. Entries are
+    given verbatim. No rank is given because the source does not distinguish genera and subgenera, and replacement
+    names stated in the comments (n.n. pro) become name relations. Spam was filtered out of the anonymous web
     comments and email addresses were redacted.
   url: https://github.com/CatalogueOfLife/data-ubio
 source:

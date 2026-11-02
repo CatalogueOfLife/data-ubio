@@ -42,7 +42,8 @@ contact:
 conversion:
   description: >-
     Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio Index Animalium
-    database. The parsed entries are used as they are. HTML entities and mojibake are repaired, and the links
+    database. Names are composed from the columns parsed by uBio, and the verbatim index line is kept in the
+    remarks. No rank is given because the source states none. HTML entities and mojibake are repaired, and the links
     between recombinations and their original entries are given as basionym relations.
   url: https://github.com/CatalogueOfLife/data-ubio
 source:

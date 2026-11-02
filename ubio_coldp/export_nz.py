@@ -72,7 +72,7 @@ def main(args: list[str]) -> None:
 
     arc.write(con, "NameUsage", """
         SELECT CAST(e.uid AS VARCHAR) AS ID, a.ids AS nameAlternativeID, 'bare name' AS status,
-               e.name AS scientificName, e.authority AS authorship, 'genus' AS rank, 'zoological' AS code,
+               e.name AS scientificName, e.authority AS authorship, 'zoological' AS code,
                CASE WHEN trim(e.publication) <> '' THEN CAST(e.uid AS VARCHAR) END AS nameReferenceID,
                CASE WHEN e.year > 0 THEN e.year END AS publishedInYear,
                CASE WHEN e.extinctFlag = 1 THEN 'true' END AS extinct,
@@ -88,7 +88,7 @@ def main(args: list[str]) -> None:
         FROM nz.entries e
         LEFT JOIN nz_alt a USING (uid) LEFT JOIN nz_see s USING (uid) LEFT JOIN nz_ed d USING (uid)
         UNION ALL
-        SELECT 'a' || additionID, NULL, 'bare name', nameString, author, 'genus', 'zoological',
+        SELECT 'a' || additionID, NULL, 'bare name', nameString, author, 'zoological',
                CASE WHEN trim(publication) <> '' THEN 'a' || additionID END,
                TRY_CAST(regexp_extract(author, '(1[5-9][0-9]{2}|20[0-2][0-9])', 1) AS INTEGER),
                CASE WHEN extinct = 1 THEN 'true' END,
@@ -108,14 +108,7 @@ def main(args: list[str]) -> None:
 
     con.register("_nn", replacement_relations(con))
     arc.write(con, "NameRelation", """
-        SELECT nameID, relatedNameID, 'replacement name' AS type, remarks FROM _nn
-        UNION ALL
-        -- homonyms: a flagged entry is a later homonym of the earliest entry with the same name
-        SELECT CAST(l.uid AS VARCHAR), CAST(arg_min(o.uid, o.year) AS VARCHAR), 'later homonym', NULL
-        FROM nz.entries l JOIN nz.entries o ON o.name = l.name AND o.year < l.year AND o.year > 0
-        WHERE l.homonymFlag = 1 AND l.year > 0
-        GROUP BY l.uid
-        ORDER BY 1, 3""")
+        SELECT nameID, relatedNameID, 'replacement name' AS type, remarks FROM _nn ORDER BY 1, 2""")
 
     arc.metadata(load_metadata_template("nomenclator-zoologicus"))
     con.close()

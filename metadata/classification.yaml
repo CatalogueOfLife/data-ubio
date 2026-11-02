@@ -29,5 +29,8 @@ conversion:
   description: >-
     Converted with a Python and DuckDB script from the November 2015 MySQL dump of uBio's ClassificationBank.
     Accepted taxa and synonyms use uBio NameBank names and identifiers, and common-name synonyms become vernacular
-    names.
+    names. Nodes whose parent is not part of the classification become root taxa, with the source parent given in
+    the remarks. The uBio data are represented as verbatim as possible: name strings are passed unchanged for
+    ChecklistBank to parse and nothing is inferred. A uBio rank is only left out when it is unparsable or
+    contradicts the name.
   url: https://github.com/CatalogueOfLife/data-ubio

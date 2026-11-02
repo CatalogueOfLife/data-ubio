@@ -33,8 +33,7 @@ def main(args: list[str]) -> None:
                TRY_CAST(regexp_extract(d.col4, '.*\b(17[5-9][0-9]|18[0-5][0-9])\b', 1) AS INTEGER) AS year,
                regexp_extract(d.col4, ',\s*\[?(\d+)\]?\s*$', 1) AS page,
                nullif(trim(fix_text(d.leftovers)), '') AS leftovers,
-               nullif(trim(regexp_replace(regexp_replace(fix_text(d.afterDash), '^[\[\s]+', ''), '[.,;\s]+$', '')), '') AS original_genus,
-               trim(d.col2) = '' AND regexp_matches(trim(d.col1), '^[A-Z]') AS is_genus,
+               nullif(trim(fix_text(d.afterDash)), '') AS after_dash,
                d.publ, d."round", n.filename, n.pagenum, fix_text(n.rawData) AS raw
         FROM ia.data d LEFT JOIN ia.names n USING (uid)
         WHERE trim(d.col1) <> ''""")
@@ -46,21 +45,19 @@ def main(args: list[str]) -> None:
     arc.write(con, "NameUsage", r"""
         SELECT CAST(e.uid AS VARCHAR) AS ID, 'bare name' AS status,
                concat_ws(' ', nullif(e.genus, ''), '(' || e.subgenus || ')', e.epithet) AS scientificName,
-               e.author AS authorship, CASE WHEN e.is_genus THEN 'genus' ELSE 'species' END AS rank,
-               'zoological' AS code,
+               e.author AS authorship, 'zoological' AS code,
                CASE WHEN e.citation IS NOT NULL THEN CAST(e.uid AS VARCHAR) END AS nameReferenceID,
                e.year AS publishedInYear, nullif(e.page, '') AS publishedInPage,
                CASE WHEN e.leftovers ILIKE '%n. n.%' THEN 'nomen nudum' END AS nameStatus,
                concat_ws('; ',
-                   CASE WHEN e.genus_raw LIKE '[%' THEN 'genus not stated explicitly in original' END,
-                   'genus as cited: ' || CASE WHEN e.genus_raw LIKE '%(%' THEN e.genus_raw END,
-                   CASE WHEN e.is_genus THEN 'group: ' || e.original_genus
-                        ELSE 'original genus: ' || coalesce(g.genusLink, e.original_genus) END,
+                   'genus as printed: ' || CASE WHEN e.genus_raw <> e.genus THEN e.genus_raw END,
+                   'after dash: ' || e.after_dash,
+                   'genus link: ' || g.genusLink,
                    e.leftovers,
                    'Index Animalium ' || CASE WHEN lower(e.filename) LIKE 'sil34_01%' THEN 'sect. 1 (1758-1800)'
                                               ELSE 'sect. 2 (1801-1850)' END
                        || ', p. ' || e.pagenum || ' (scan ' || e.filename || ')',
-                   CASE WHEN e."round" > 1 THEN 'verbatim: ' || e.raw END) AS remarks
+                   'verbatim: ' || e.raw) AS remarks
         FROM ia_e e LEFT JOIN (SELECT uid, any_value(genusLink) AS genusLink FROM ia.genus_links GROUP BY 1) g USING (uid)
         ORDER BY e.uid""")
     arc.write(con, "Reference", """

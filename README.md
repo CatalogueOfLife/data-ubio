@@ -116,15 +116,15 @@ Classifications transcribed by uBio (ClassificationBank id in the archive name):
   - NameBank `namebankID` is used as the usage and name ID. Synonyms from ClassificationBank are `s<synonymsID>`.
   - Every name carries `ubio:<namebankID>` in `nameAlternativeID`.
 - **Superseded names** (`supercedureID`, 352k empty records) are dropped and every reference to them is redirected to the current ID.
-- **uBiota tree repair**
-  - About 7.8k names placed twice keep their first placement.
-  - Parents missing from the classification are added as implied nodes (4,959) where the name exists. Nodes are re-attached to their nearest ancestor present in the ancestry path.
-- **Name split**: the NameBank canonical form gives `scientificName` and the rest of the string becomes `authorship`. Otherwise the full string is kept.
+- **Verbatim:** the uBio data are represented as they were, and nothing is inferred.
+  - uBio name strings are passed unchanged as `scientificName` for ChecklistBank to parse.
+  - In a classification, a node whose parent is not part of it becomes a root, with the source parent in `remarks`.
+  - ColDP allows one parent per ID, so a name placed more than once keeps its first placement, and the other parents are listed in `remarks`.
 - **Ranks:** a wrong rank is worse than none, so uncertain ranks are left out and ChecklistBank infers them from the name.
   - uBio rank labels are mapped with ChecklistBank's rank parser into `config/ranks.yaml`. Unparsable, uncertain (`?var`) and ambiguous (`division`) labels map to nothing.
-  - A var./f./subsp. marker in the original name string decides the rank.
-  - A rank that contradicts the number of name parts (e.g. trinomials ranked species) is dropped. In the zoological lists, trinomials become subspecies.
+  - A rank that contradicts the number of parts of uBio's canonical form (e.g. trinomials ranked species) is dropped.
   - Names with conflicting ranks in NameBank get none.
+  - Nomenclator Zoologicus and Index Animalium state no ranks, so none are given.
 - **References**: NameBank citations become references.
   - `nameReferenceID` is only set when the citation year equals the year in the name.
   - All other citations go into `referenceID`, for placed taxa only.
