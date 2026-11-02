@@ -24,31 +24,62 @@ dump, and its `filters()` function documents exactly which rows and columns were
 
 The ColDP archives built from `source/` have exactly the same row counts as those built from the full dump.
 
-## Run
+## Rebuild and upload
+
+You need [uv](https://docs.astral.sh/uv/) and about 3 GB of free disk. The full rebuild from this repository takes
+about two minutes; the original `ubio-db.tar` is not needed.
+
+**1. Set up**
 
 ```sh
+git clone https://github.com/CatalogueOfLife/data-ubio.git && cd data-ubio
 uv sync
-uv run python -m ubio_coldp.stage --source          # source/*.parquet -> work/ubio.duckdb (~10 s)
-# or, with the full dump in ./ubio-db.tar:
-# uv run python -m ubio_coldp.stage                 # tar -> work/ubio.duckdb (~3 min)
-# uv run python -m ubio_coldp.archive_source        # work/ubio.duckdb -> source/
-uv run python -m ubio_coldp.profile                 # optional: profiling report used for the mapping decisions
+```
+
+**2. Load the source data** from `source/` into the working database `work/ubio.duckdb`
+
+```sh
+uv run python -m ubio_coldp.stage --source
+```
+
+**3. Build all archives** into `output/` and check them
+
+```sh
 uv run python -m ubio_coldp.export_main             # output/ubio-namebank.zip
 uv run python -m ubio_coldp.export_nz               # output/nomenclator-zoologicus.zip
 uv run python -m ubio_coldp.export_index_animalium  # output/index-animalium.zip
 uv run python -m ubio_coldp.export_hershkovitz      # output/hershkovitz-whales.zip
 uv run python -m ubio_coldp.export_classification   # output/classifications/<cid>-<slug>.zip (config/classifications.yaml)
-uv run python -m ubio_coldp.validate                # integrity checks on every zip
-./upload.sh                                         # upload all archives in output/ to ChecklistBank
+uv run python -m ubio_coldp.validate                # integrity checks on every zip; must report 0 with errors
 ```
 
-`upload.sh` uploads every archive found in `output/`, smallest first. It asks for your ChecklistBank username and
-password and logs in for a token; alternatively, set `CLB_TOKEN` to a JWT.
-- **Options:** archive names to upload only those, `--skip=a,b` to leave some out, `--dry-run` to only list.
-- **Dataset keys:** `config/checklistbank.yaml` maps every archive to its ChecklistBank dataset key. An archive that isn't listed yet gets a new private dataset.
+Each exporter replaces its own archive and can be run on its own. Add `--keep` to also keep the unzipped files next to
+the zip. `export_classification` takes ClassificationBank ids to build only some lists, e.g. `export_classification 8 35`.
+
+**4. Upload to ChecklistBank**
+
+```sh
+./upload.sh --dry-run      # list the archives and the dataset each one goes to
+./upload.sh                # upload all of them; asks for your ChecklistBank username and password
+```
+
+`upload.sh` uploads every archive found in `output/`, smallest first, and ChecklistBank imports them in the
+background.
+- **Options:** give archive names to upload only those (e.g. `./upload.sh ubio-namebank`), or use `--skip=a,b` to leave some out.
+- **Dataset keys:** `config/checklistbank.yaml` maps every archive to its dataset key. An archive that isn't listed yet gets a new private dataset, which you need to publish in ChecklistBank.
+- **Login:** set `CLB_TOKEN` to a JWT instead of logging in.
 - **Other environments:** set `CLB_API`, e.g. to `https://api.dev.checklistbank.org`.
 
-Every exporter takes `--keep` to keep the unzipped folder next to the zip.
+### Rebuilding from the original dump
+
+Only needed to change which source rows are kept, i.e. the filters in `ubio_coldp/archive_source.py`. Place
+`ubio-db.tar` in the repository root, then:
+
+```sh
+uv run python -m ubio_coldp.stage                   # tar -> work/ubio.duckdb (~3 min, streams without extracting)
+uv run python -m ubio_coldp.archive_source          # work/ubio.duckdb -> source/ (commit the result)
+uv run python -m ubio_coldp.profile                 # optional: profiling report behind the mapping decisions
+```
 
 ## Archives
 
