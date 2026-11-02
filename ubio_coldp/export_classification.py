@@ -19,6 +19,9 @@ from .coldp import Archive, connect, fix_text, load_metadata_template
 from .disk import check_budget
 
 CONFIG = Path(__file__).resolve().parent.parent / "config" / "classifications.yaml"
+REPO_URL = "https://github.com/CatalogueOfLife/data-ubio"
+GEO_SCOPE = {35: "Belgian Congo (Democratic Republic of the Congo)", 1: "North America", 2: "North America"}
+CREATORS = Path(__file__).resolve().parent.parent / "config" / "classification-creators.yaml"
 
 # preferred spelling of ranks when NameBank gives several for one name
 STANDARD_RANKS = [
@@ -309,6 +312,20 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
         ] if x),
         **{k: v for k, v in tmpl.items() if k not in ("description",)},
     }
+    roots = [r for r in con.execute("""
+        SELECT n.scientificName, (SELECT count(*) FROM tree c WHERE c.parentID = t.ID) AS kids
+        FROM tree t JOIN nm_name n ON n.namebankID = t.ID
+        WHERE t.parentID IS NULL AND EXISTS (SELECT 1 FROM tree c WHERE c.parentID = t.ID) AND n.scientificName NOT LIKE '% %'
+        ORDER BY kids DESC LIMIT 5""").fetchall()]
+    roots = [name for name, kids in roots if kids * 5 >= roots[0][1]] if roots else []
+    md["taxonomicScope"] = ", ".join(roots)
+    md["geographicScope"] = GEO_SCOPE.get(cid, "global")
+    md.setdefault("url", REPO_URL)
+    with open(CREATORS, encoding="utf-8") as f:
+        creators = yaml.safe_load(f) or {}
+    if cid in creators:
+        md = {k: md[k] for k in ("title", "alias", "description")} | {"creator": creators[cid]} | \
+             {k: v for k, v in md.items() if k not in ("title", "alias", "description")}
     if meta["url"]:
         md["url"] = meta["url"]
     if meta["date"]:

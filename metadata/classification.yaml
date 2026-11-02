@@ -7,6 +7,26 @@ version: "2015-11-13"
 issued: "2015-11-13"
 keyword: [uBio, ClassificationBank]
 confidence: 2
-license: TODO
-creator: TODO
-contact: TODO
+license: CC-BY-4.0
+publisher:
+  organisation: uBio, MBLWHOI Library, Marine Biological Laboratory
+  city: Woods Hole
+  country: US
+contributor:
+  - given: David
+    family: Remsen
+    note: uBio project lead at the MBLWHOI Library; assembled the uBio databases this dataset was converted from
+contact:
+  given: Markus
+  family: Döring
+  email: mdoering@gbif.org
+  orcid: 0000-0003-3756-4793
+  organisation: Global Biodiversity Information Facility
+  city: Berlin
+  country: DE
+conversion:
+  description: >-
+    Converted with a Python and DuckDB script from the November 2015 MySQL dump of uBio's ClassificationBank.
+    Accepted taxa and synonyms use uBio NameBank names and identifiers, and common-name synonyms become vernacular
+    names.
+  url: https://github.com/CatalogueOfLife/data-ubio

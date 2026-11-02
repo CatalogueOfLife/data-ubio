@@ -90,6 +90,11 @@ Every exporter takes `--keep` to keep the unzipped folder next to the zip.
 - AMNH
 - the UBT ontology extras (EOL-derived distributions, AnAge longevity)
 
-## TODO
+## Metadata
 
-- `license`, `creator` and `contact` in `metadata/*.yaml` are still `TODO`.
+- **Templates:** `metadata/*.yaml` holds the templates for the main, NZ, Index Animalium and Hershkovitz archives, and `metadata/classification.yaml` the shared template for the lists. All archives are CC-BY-4.0, with a `conversion` section pointing to this repository.
+- **Creators:**
+  - The main archive credits the uBio team: David Remsen, Patrick Leary, Catherine Norton and Dmitry Mozzherin.
+  - The other archives credit the author of their source (Neave, Sherborn, Hershkovitz, and the list authors in `config/classification-creators.yaml`), with David Remsen as contributor.
+  - The lists without a stated author (32, 45, 5, 51) have no creator.
+- **Classification metadata:** title, description and date come from ClassificationBank. The taxonomic scope is derived from the root taxa.

@@ -10,13 +10,31 @@ description: >-
   Synonym records are prefixed with "s".
 version: "2015-11-13"
 issued: "1966"
+url: https://github.com/CatalogueOfLife/data-ubio
 keyword: [uBio, Cetacea, whales, catalogue]
 taxonomicScope: Cetacea
 geographicScope: global
 confidence: 3
-license: TODO
-creator: TODO
-contact: TODO
+license: CC-BY-4.0
+creator:
+  - given: Philip
+    family: Hershkovitz
+publisher:
+  organisation: uBio, MBLWHOI Library, Marine Biological Laboratory
+  city: Woods Hole
+  country: US
+contributor:
+  - given: David
+    family: Remsen
+    note: uBio project lead at the MBLWHOI Library; assembled the uBio databases this dataset was converted from
+contact:
+  given: Markus
+  family: Döring
+  email: mdoering@gbif.org
+  orcid: 0000-0003-3756-4793
+  organisation: Global Biodiversity Information Facility
+  city: Berlin
+  country: DE
 source:
   - id: hershkovitz1966
     type: book
@@ -26,3 +44,9 @@ source:
     volume: "246"
     page: 1-259
     issued: "1966"
+conversion:
+  description: >-
+    Converted with a Python and DuckDB script from the November 2015 MySQL dump of uBio's ClassificationBank
+    (classification 57) and the Hershkovitz database, which supplied type material, type localities and
+    distributions. Duplicate chresonym entries are merged into one synonym per name.
+  url: https://github.com/CatalogueOfLife/data-ubio

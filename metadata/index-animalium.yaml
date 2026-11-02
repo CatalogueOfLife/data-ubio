@@ -12,11 +12,48 @@ description: >-
   Nomina nuda are flagged. Record identifiers are the uBio Index Animalium uids.
 version: "2015-11-13"
 issued: "2015-11-13"
+url: https://github.com/CatalogueOfLife/data-ubio
 keyword: [uBio, Index Animalium, Sherborn, nomenclator, zoology]
 taxonomicScope: Animalia
 geographicScope: global
 temporalScope: 1758-1850
 confidence: 3
-license: TODO
-creator: TODO
-contact: TODO
+license: CC-BY-4.0
+creator:
+  - given: Charles Davies
+    family: Sherborn
+publisher:
+  organisation: uBio, MBLWHOI Library, Marine Biological Laboratory
+  city: Woods Hole
+  country: US
+contributor:
+  - given: David
+    family: Remsen
+    note: uBio project lead at the MBLWHOI Library; assembled the uBio databases this dataset was converted from
+contact:
+  given: Markus
+  family: Döring
+  email: mdoering@gbif.org
+  orcid: 0000-0003-3756-4793
+  organisation: Global Biodiversity Information Facility
+  city: Berlin
+  country: DE
+conversion:
+  description: >-
+    Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio Index Animalium
+    database. The parsed entries are used as they are. HTML entities and mojibake are repaired, and the links
+    between recombinations and their original entries are given as basionym relations.
+  url: https://github.com/CatalogueOfLife/data-ubio
+source:
+  - id: sherborn1902
+    type: book
+    author: [{family: Sherborn, given: Charles Davies}]
+    title: "Index Animalium sive index nominum quae ab A.D. MDCCLVIII generibus et speciebus animalium imposita sunt. Sectio prima (1758-1800)"
+    publisher: Cambridge University Press
+    issued: "1902"
+  - id: sherborn1922
+    type: book
+    author: [{family: Sherborn, given: Charles Davies}]
+    title: "Index Animalium sive index nominum quae ab A.D. MDCCLVIII generibus et speciebus animalium imposita sunt. Sectio secunda (1801-1850)"
+    publisher: British Museum (Natural History)
+    issued: 1922-1933

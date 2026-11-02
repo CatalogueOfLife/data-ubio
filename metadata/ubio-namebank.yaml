@@ -21,6 +21,34 @@ taxonomicScope: Biota
 geographicScope: global
 confidence: 1
 completeness: 3
-license: TODO
-creator: TODO
-contact: TODO
+license: CC-BY-4.0
+creator:
+  - given: David
+    family: Remsen
+  - given: Patrick
+    family: Leary
+  - given: Catherine
+    family: Norton
+  - given: Dmitry
+    family: Mozzherin
+publisher:
+  organisation: uBio, MBLWHOI Library, Marine Biological Laboratory
+  city: Woods Hole
+  country: US
+contact:
+  given: Markus
+  family: Döring
+  email: mdoering@gbif.org
+  orcid: 0000-0003-3756-4793
+  organisation: Global Biodiversity Information Facility
+  city: Berlin
+  country: DE
+conversion:
+  description: >-
+    Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio databases. The uBiota
+    classification (ClassificationBank 104) provides the accepted taxa, after repairing duplicate placements and
+    missing parents. All other NameBank scientific names are added as bare names. Superseded NameBank records are
+    redirected to their current identifier. Vernacular names are kept only for taxa in uBiota. Misspelling, lexical-
+    variant and basionym groups become name relations, and external database mappings become alternative
+    identifiers.
+  url: https://github.com/CatalogueOfLife/data-ubio

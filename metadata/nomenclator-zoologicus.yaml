@@ -16,10 +16,41 @@ description: >-
   prefixed with "a".
 version: "2015-11-13"
 issued: "2015-11-13"
+url: https://github.com/CatalogueOfLife/data-ubio
 keyword: [uBio, Nomenclator Zoologicus, genera, zoology, nomenclator]
 taxonomicScope: Animalia
 geographicScope: global
 confidence: 4
-license: TODO
-creator: TODO
-contact: TODO
+license: CC-BY-4.0
+creator:
+  - given: Sheffield Airey
+    family: Neave
+publisher:
+  organisation: uBio, MBLWHOI Library, Marine Biological Laboratory
+  city: Woods Hole
+  country: US
+contributor:
+  - given: David
+    family: Remsen
+    note: uBio project lead at the MBLWHOI Library; assembled the uBio databases this dataset was converted from
+contact:
+  given: Markus
+  family: Döring
+  email: mdoering@gbif.org
+  orcid: 0000-0003-3756-4793
+  organisation: Global Biodiversity Information Facility
+  city: Berlin
+  country: DE
+conversion:
+  description: >-
+    Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio NZ database. Replacement
+    names (n.n. pro) and later homonyms are given as name relations. Spam was filtered out of the anonymous web
+    comments and email addresses were redacted.
+  url: https://github.com/CatalogueOfLife/data-ubio
+source:
+  - id: neave1939
+    type: book
+    author: [{family: Neave, given: Sheffield Airey}]
+    title: "Nomenclator Zoologicus: a list of the names of genera and subgenera in zoology from the tenth edition of Linnaeus 1758 to the end of 1935 (and later volumes 5-10)"
+    publisher: Zoological Society of London
+    issued: 1939-2004
