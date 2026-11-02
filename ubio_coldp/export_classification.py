@@ -20,6 +20,8 @@ from .disk import check_budget
 
 CONFIG = Path(__file__).resolve().parent.parent / "config" / "classifications.yaml"
 REPO_URL = "https://github.com/CatalogueOfLife/data-ubio"
+# all exported classifications cover animals, except Margulis & Schwartz (Five Kingdoms) and bacteria
+NOT_ZOOLOGICAL = {25, 29}
 GEO_SCOPE = {35: "Belgian Congo (Democratic Republic of the Congo)", 1: "North America", 2: "North America"}
 CREATORS = Path(__file__).resolve().parent.parent / "config" / "classification-creators.yaml"
 
@@ -87,6 +89,31 @@ def prepare_names(con: duckdb.DuckDBPyConnection) -> None:
         SELECT nr.namebankID, arg_min(r.rankName, coalesce(std.prio, 1000) * 1000 + r.rankID) AS rank
         FROM nb2.nameRanks nr JOIN nb2.ranks r USING (rankID) LEFT JOIN std ON lower(r.rankName) = std.rankName
         GROUP BY 1""")
+    # rank level: 1 = genus and above, 2 = species, 3 = infraspecific; NULL = unknown
+    con.execute(r"""CREATE OR REPLACE TEMP MACRO rank_level(r) AS CASE
+        WHEN r IS NULL THEN NULL
+        WHEN lower(trim(r)) IN ('species', 'sp', 'sp.', 'spec', 'binomial', 'agsp') THEN 2
+        WHEN regexp_matches(lower(r), '^(sub-?species|subsp\.?|ssp\.?|var\.?|variety|subvariety|sub-?forma?|forma?|fo\.?|f\.?|infraspecies|infraspecific.*|trinomial|subspecific|race|morph|aberration|ab\.?)$') THEN 3
+        WHEN regexp_matches(lower(r), 'genus|^gen\.?$|famil|tribe|order|class|phylum|kingdom|division|section|^sect\.?$|series|domain|cohort') THEN 1
+        END""")
+    con.execute("""CREATE OR REPLACE TEMP MACRO name_words(c) AS
+        CASE WHEN c IS NULL OR trim(c) = '' THEN NULL ELSE len(string_split(trim(c), ' ')) END""")
+    # rank corrected when the canonical name has more parts than the rank allows
+    con.execute(r"""CREATE OR REPLACE TEMP MACRO final_rank(r, c, ns) AS CASE
+        WHEN rank_level(r) IS NULL OR rank_level(r) = 3 OR name_words(c) IS NULL OR name_words(c) <= rank_level(r) THEN r
+        WHEN name_words(c) = 2 THEN 'species'
+        WHEN regexp_matches(ns, '\svar\.?\s') THEN 'variety'
+        WHEN regexp_matches(ns, '\s(f|fo|forma)\.?\s') THEN 'form'
+        WHEN regexp_matches(ns, '\s(subsp|ssp)\.?\s') THEN 'subspecies'
+        ELSE 'infraspecific name' END""")
+    # canonical form split off as scientificName, unless it is shorter than the rank implies: NameBank truncated
+    # canonical forms of old names with capitalised epithets (e.g. "Balæna Mysticetus" -> "Balæna")
+    con.execute("""CREATE OR REPLACE TEMP MACRO split_ok(r, c, ns) AS
+        c IS NOT NULL AND c <> '' AND starts_with(ns, c || ' ')
+        AND NOT coalesce(name_words(c) < rank_level(r), false)""")
+    con.execute("CREATE OR REPLACE TEMP MACRO sci_name(r, c, ns) AS CASE WHEN split_ok(r, c, ns) THEN c ELSE ns END")
+    con.execute("""CREATE OR REPLACE TEMP MACRO auth_name(r, c, ns) AS
+        CASE WHEN split_ok(r, c, ns) THEN nullif(trim(substr(ns, length(c) + 2)), '') END""")
     con.execute("""
         CREATE OR REPLACE TEMP TABLE nm_name AS
         SELECT n.namebankID,
@@ -265,10 +292,19 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
         FROM syn_all a JOIN cb.Chresonym ch USING (synonymsID) WHERE a.nameID = a.acceptedID GROUP BY 1""")
     con.execute("""CREATE OR REPLACE TEMP MACRO ref_list(a, b) AS
         nullif(array_to_string(list_sort(list_distinct(list_filter(string_split(concat_ws(',', a, b), ','), lambda x: x <> ''))), ','), '')""")
-    arc.write(con, "NameUsage", """
+    zoological = cid not in NOT_ZOOLOGICAL
+    con.execute("""CREATE OR REPLACE TEMP MACRO zoo_rank(x) AS
+        CASE WHEN x = 'infraspecific name' THEN 'subspecies' ELSE x END""")
+    con.execute("CREATE OR REPLACE TEMP MACRO same_rank(x) AS x")
+    rank_fn = "zoo_rank" if zoological else "same_rank"
+    code = "'zoological'" if zoological else "NULL"
+    arc.write(con, "NameUsage", f"""
         SELECT CAST(t.ID AS VARCHAR) AS ID, 'ubio:' || t.ID AS nameAlternativeID,
                CAST(t.parentID AS VARCHAR) AS parentID, 'accepted' AS status,
-               n.scientificName, n.authorship, coalesce(r.rankName, n.rank) AS rank,
+               sci_name(coalesce(r.rankName, n.rank), n.canonical, n.nameString) AS scientificName,
+               auth_name(coalesce(r.rankName, n.rank), n.canonical, n.nameString) AS authorship,
+               {rank_fn}(final_rank(coalesce(r.rankName, n.rank), n.canonical, n.nameString)) AS rank,
+               {code} AS code,
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END AS nameReferenceID,
                ref_list(c.otherRefs, sr.refs) AS referenceID,
                n.extinct,
@@ -280,7 +316,8 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
         LEFT JOIN self_refs sr ON sr.ID = t.ID
         UNION ALL
         SELECT 's' || s.synonymsID, 'ubio:' || s.nameID, CAST(s.acceptedID AS VARCHAR), s.status,
-               n.scientificName, n.authorship, n.rank,
+               sci_name(n.rank, n.canonical, n.nameString), auth_name(n.rank, n.canonical, n.nameString),
+               {rank_fn}(final_rank(n.rank, n.canonical, n.nameString)), {code},
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END,
                ref_list(c.otherRefs, r.refs),
                n.extinct, s.remarks
