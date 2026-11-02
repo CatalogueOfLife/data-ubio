@@ -1,0 +1,15 @@
+[project]
+name = "ubio-coldp"
+version = "0.1.0"
+description = "Convert the 2015 uBio database dump into ColDP archives"
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.1",
+    "pyarrow>=17",
+    "ftfy>=6.2",
+    "pyyaml>=6",
+    "numpy>=2",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,22 @@
+title: "Index Animalium (uBio digital edition)"
+alias: Index Animalium
+description: >-
+  Index Animalium by Charles Davies Sherborn (1861-1942) lists the names given to genera and species of animals from
+  1758 to 1850, with authors and bibliographic references. Section 1 covers 1758-1800 (1902) and section 2 covers
+  1801-1850 (1922-1933). Smithsonian Institution Libraries scanned the work. uBio, the Marine Biological Laboratory
+  and Smithsonian Institution Libraries then parsed it into a searchable database.
+
+  This archive was generated from the November 2015 uBio database dump. It contains the parsed species-group entries,
+  each with author, microcitation, year and page. Each entry's remarks give the source page, the original genus and
+  the scan file. Where a recombination links to its original entry, this is given as a basionym relation.
+  Nomina nuda are flagged. Record identifiers are the uBio Index Animalium uids.
+version: "2015-11-13"
+issued: "2015-11-13"
+keyword: [uBio, Index Animalium, Sherborn, nomenclator, zoology]
+taxonomicScope: Animalia
+geographicScope: global
+temporalScope: 1758-1850
+confidence: 3
+license: TODO
+creator: TODO
+contact: TODO

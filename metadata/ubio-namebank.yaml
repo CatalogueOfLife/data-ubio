@@ -1,0 +1,26 @@
+title: "uBio NameBank and uBiota"
+alias: uBio
+description: |
+  uBio (Universal Biological Indexer and Organizer) was a names-based biodiversity informatics initiative run by the
+  MBLWHOI Library at the Marine Biological Laboratory (MBL) in Woods Hole, Massachusetts, from 2002 until about 2015.
+  Its NameBank indexed more than 11 million scientific and vernacular name strings, including their lexical variants,
+  basionym links, literature citations and links to more than 100 external taxonomic databases.
+  ClassificationBank held many classifications. uBiota, the Unified Biological Taxonomy (classification 104), was uBio's
+  own merged classification of all life.
+
+  This archive was generated from the November 2015 uBio database dump. The uBiota tree supplies the accepted taxa.
+  All other NameBank scientific names are included as bare names. Vernacular names are linked to uBiota taxa.
+  Lexical variants (misspellings, case and authorship variants) and basionym groups are given as name relations.
+  NameBank citations are included as references, and the identifiers of external databases mapped by uBio are given as
+  alternative identifiers. NameBank identifiers (namebankID) are kept as record identifiers.
+version: "2015-11-13"
+issued: "2015-11-13"
+url: http://www.ubio.org
+keyword: [uBio, NameBank, ClassificationBank, uBiota, nomenclator, vernacular names]
+taxonomicScope: Biota
+geographicScope: global
+confidence: 1
+completeness: 3
+license: TODO
+creator: TODO
+contact: TODO

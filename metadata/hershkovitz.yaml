@@ -1,0 +1,28 @@
+title: "Catalog of Living Whales (Hershkovitz 1966)"
+alias: Hershkovitz Whales
+description: >-
+  Philip Hershkovitz (1966), Catalog of Living Whales. Bulletin of the United States National Museum 246: 1-259.
+  uBio transcribed the catalogue into its ClassificationBank (classification 57) and into a separate database that
+  holds type material, type localities, distributions and the full chresonymy.
+
+  This archive was generated from the November 2015 uBio database dump. Accepted names, synonyms, chresonymy
+  references, type material and distributions are included. Record identifiers are uBio NameBank identifiers.
+  Synonym records are prefixed with "s".
+version: "2015-11-13"
+issued: "1966"
+keyword: [uBio, Cetacea, whales, catalogue]
+taxonomicScope: Cetacea
+geographicScope: global
+confidence: 3
+license: TODO
+creator: TODO
+contact: TODO
+source:
+  - id: hershkovitz1966
+    type: book
+    author: [{family: Hershkovitz, given: Philip}]
+    title: Catalog of Living Whales
+    container-title: Bulletin of the United States National Museum
+    volume: "246"
+    page: 1-259
+    issued: "1966"

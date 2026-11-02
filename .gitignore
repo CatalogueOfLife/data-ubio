@@ -1,0 +1,7 @@
+ubio-db.tar
+work/
+output/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

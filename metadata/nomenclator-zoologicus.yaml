@@ -1,0 +1,25 @@
+title: "Nomenclator Zoologicus (uBio digital edition)"
+alias: NZ uBio
+description: >-
+  Nomenclator Zoologicus is a list of the names of genera and subgenera in zoology from the tenth edition of Linnaeus
+  (1758) to the end of 2004. It was compiled by Sheffield Airey Neave and successors and published in ten volumes by
+  the Zoological Society of London from 1939 to 2004. uBio at the Marine Biological Laboratory, Woods Hole, digitised
+  volumes 1 to 10 and made them available online from 2004 to 2005. uBio editors reviewed the entries and online users
+  submitted additional names.
+
+  This archive was generated from the November 2015 uBio database dump. It holds every entry with authority, original
+  publication (microcitation) and year, and extinct, homonym, corrigenda and addendum flags.
+  Each entry's remarks contain the editor's comment, the taxonomic group and the "see also" cross-references.
+  Replacement names (n.n. pro) and later homonyms are given as name relations.
+  uBio NameBank identifiers are given as alternative identifiers.
+  Record identifiers are the uBio NZ uids, the same as in ChecklistBank dataset 126539. Later online additions are
+  prefixed with "a".
+version: "2015-11-13"
+issued: "2015-11-13"
+keyword: [uBio, Nomenclator Zoologicus, genera, zoology, nomenclator]
+taxonomicScope: Animalia
+geographicScope: global
+confidence: 4
+license: TODO
+creator: TODO
+contact: TODO
