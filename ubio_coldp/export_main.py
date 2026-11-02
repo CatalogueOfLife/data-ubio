@@ -72,6 +72,7 @@ def main(args: list[str]) -> None:
                CASE WHEN t.ID IS NOT NULL THEN c.otherRefs END AS referenceID,
                n.extinct,
                concat_ws('; ', CASE WHEN t.implied THEN 'parent implied by uBiota ancestry path' END,
+                         CASE WHEN t.inferred THEN 'parent missing in source, inferred from the name' END,
                          cr.remarks) AS remarks
         FROM usage_ids u
         JOIN nm_name n USING (namebankID)

@@ -160,7 +160,7 @@ def prepare_names(con: duckdb.DuckDBPyConnection) -> None:
 
 
 def build_tree(con: duckdb.DuckDBPyConnection, cid: int) -> pa.Table:
-    """Return the repaired tree of one classification as (ID, parentID, rankID, implied).
+    """Return the repaired tree of one classification as (ID, parentID, rankID, implied, inferred).
 
     - superseded namebankIDs are replaced by their current ID
     - names placed more than once keep their first placement (lowest hierarchiesID)
@@ -205,6 +205,23 @@ def build_tree(con: duckdb.DuckDBPyConnection, cid: int) -> pa.Table:
         out_parent.append(p)
         out_rank.append(rank)
         out_implied.append(child in implied and rank is None)
+    # roots with a multi-part name: attach to the node named by all but the last part, if it is in the tree
+    # (e.g. "Meliërax gabar" with parentID 0 in the source -> genus Meliërax)
+    con.register("_ids", pa.table({"ID": pa.array(out_id, pa.int64())}))
+    canon = dict(con.execute("""SELECT i.ID, coalesce(nullif(n.canonical, ''), n.nameString)
+                                FROM _ids i JOIN nm_name n ON n.namebankID = i.ID""").fetchall())
+    con.unregister("_ids")
+    by_name: dict[str, int] = {}
+    for node in out_id:
+        by_name.setdefault(canon.get(node, ""), node)
+    out_inferred = [False] * len(out_id)
+    for i, node in enumerate(out_id):
+        words = canon.get(node, "").split()
+        if out_parent[i] is None and len(words) >= 2:
+            pid = by_name.get(" ".join(words[:-1]))
+            if pid is not None and pid != node:
+                out_parent[i] = pid
+                out_inferred[i] = True
     # break accidental cycles
     parent_of = dict(zip(out_id, out_parent))
     for i, node in enumerate(out_id):
@@ -216,9 +233,11 @@ def build_tree(con: duckdb.DuckDBPyConnection, cid: int) -> pa.Table:
                 break
             seen.add(cur)
             cur = parent_of.get(cur)
-    print(f"  tree {cid}: {len(rows):,} rows -> {len(out_id):,} nodes ({len(implied):,} implied parents)", flush=True)
+    print(f"  tree {cid}: {len(rows):,} rows -> {len(out_id):,} nodes ({len(implied):,} implied parents, "
+          f"{sum(out_inferred):,} parents inferred from names)", flush=True)
     return pa.table({"ID": pa.array(out_id, pa.int64()), "parentID": pa.array(out_parent, pa.int64()),
-                     "rankID": pa.array(out_rank, pa.int64()), "implied": pa.array(out_implied, pa.bool_())})
+                     "rankID": pa.array(out_rank, pa.int64()), "implied": pa.array(out_implied, pa.bool_()),
+                     "inferred": pa.array(out_inferred, pa.bool_())})
 
 
 def register_tree(con: duckdb.DuckDBPyConnection, cid: int, table: str = "tree") -> None:
@@ -316,7 +335,8 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END AS nameReferenceID,
                ref_list(c.otherRefs, sr.refs) AS referenceID,
                n.extinct,
-               concat_ws('; ', CASE WHEN t.implied THEN 'parent implied by uBio ancestry path' END, er.remarks) AS remarks
+               concat_ws('; ', CASE WHEN t.implied THEN 'parent implied by uBio ancestry path' END,
+                         CASE WHEN t.inferred THEN 'parent missing in source, inferred from the name' END, er.remarks) AS remarks
         FROM tree t JOIN nm_name n ON n.namebankID = t.ID
         LEFT JOIN extra_remarks er ON er.ID = t.ID
         LEFT JOIN nb2.ranks r ON r.rankID = t.rankID
