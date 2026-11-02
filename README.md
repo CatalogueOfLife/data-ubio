@@ -39,7 +39,11 @@ uv run python -m ubio_coldp.export_index_animalium  # output/index-animalium.zip
 uv run python -m ubio_coldp.export_hershkovitz      # output/hershkovitz-whales.zip
 uv run python -m ubio_coldp.export_classification   # output/classifications/<cid>-<slug>.zip (config/classifications.yaml)
 uv run python -m ubio_coldp.validate                # integrity checks on every zip
+CLB_AUTH_HEADER=~/.clb-auth uv run python -m ubio_coldp.clb_upload [archive ...]   # upload to ChecklistBank
 ```
+
+`config/checklistbank.yaml` maps every archive to its ChecklistBank dataset key. `clb_upload` creates a private
+dataset for any archive that isn't listed yet. The header file holds a single line `Authorization: Bearer <jwt>`.
 
 Every exporter takes `--keep` to keep the unzipped folder next to the zip.
 
