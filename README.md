@@ -57,6 +57,59 @@ Every exporter takes `--keep` to keep the unzipped folder next to the zip.
 | `hershkovitz-whales` | classificationbank 57 + Hershkovitz | Catalog of Living Whales (1966): synonyms, chresonymy references, type material, distributions |
 | `classifications/*` | classificationbank | 37 lists transcribed by uBio (birds, fish, Lepidoptera, Cnidaria, …). Copies of external databases are excluded |
 
+## ChecklistBank datasets
+
+Every archive is published as its own ChecklistBank dataset. `config/checklistbank.yaml` holds the same mapping.
+
+| Dataset | Key | Archive |
+|---|---|---|
+| [uBio NameBank and uBiota](https://www.checklistbank.org/dataset/316856) | 316856 | `ubio-namebank` |
+| [Nomenclator Zoologicus (uBio digital edition)](https://www.checklistbank.org/dataset/316817) | 316817 | `nomenclator-zoologicus` |
+| [Index Animalium (uBio digital edition)](https://www.checklistbank.org/dataset/316855) | 316855 | `index-animalium` |
+| [Catalog of Living Whales (Hershkovitz 1966)](https://www.checklistbank.org/dataset/316815) | 316815 | `hershkovitz-whales` |
+
+Classifications transcribed by uBio (ClassificationBank id in the archive name):
+
+| Dataset | Key | Archive |
+|---|---|---|
+| [Birds: AOU 83](https://www.checklistbank.org/dataset/316833) | 316833 | `1-birds-aou-83` |
+| [Birds: AOU 98](https://www.checklistbank.org/dataset/316832) | 316832 | `2-birds-aou-98` |
+| [Birds: James Lee Peters](https://www.checklistbank.org/dataset/316843) | 316843 | `3-birds-james-lee-peters` |
+| [Birds: Morony, Bock, and Farrand](https://www.checklistbank.org/dataset/316844) | 316844 | `4-birds-morony-bock-and-farrand` |
+| [Birds: Nomina Avium Mundi](https://www.checklistbank.org/dataset/316848) | 316848 | `5-birds-nomina-avium-mundi` |
+| [Birds: Sibley and Monroe](https://www.checklistbank.org/dataset/316847) | 316847 | `6-birds-sibley-and-monroe` |
+| [Birds: Zoonomen](https://www.checklistbank.org/dataset/316850) | 316850 | `7-birds-zoonomen` |
+| [Fish: W.T. Eschmeyer](https://www.checklistbank.org/dataset/316854) | 316854 | `8-fish-w-t-eschmeyer` |
+| [Reptilia - based on the EMBL classification](https://www.checklistbank.org/dataset/316851) | 316851 | `9-reptilia-based-on-the-embl-classification` |
+| [Amphibia World Checklist](https://www.checklistbank.org/dataset/316840) | 316840 | `10-amphibia-world-checklist` |
+| [Mammals: Wilson and Reeder, 1993](https://www.checklistbank.org/dataset/316841) | 316841 | `11-mammals-wilson-and-reeder-1993` |
+| [Birds:Howard and Moore (edition 2)](https://www.checklistbank.org/dataset/316845) | 316845 | `23-birds-howard-and-moore-edition-2` |
+| [Annelida: Rouse & Fauchald](https://www.checklistbank.org/dataset/316837) | 316837 | `24-annelida-rouse-fauchald` |
+| [Margulis & Schwartz, Third Edition](https://www.checklistbank.org/dataset/316830) | 316830 | `25-margulis-schwartz-third-edition` |
+| [Chaetognatha (based on Erik V. Thuesen )](https://www.checklistbank.org/dataset/316818) | 316818 | `28-chaetognatha-based-on-erik-v-thuesen` |
+| [Bacteria - based on J.P. Euzeby.](https://www.checklistbank.org/dataset/316838) | 316838 | `29-bacteria-based-on-j-p-euzeby` |
+| [Ctenophora](https://www.checklistbank.org/dataset/316826) | 316826 | `30-ctenophora` |
+| [Bryozoa](https://www.checklistbank.org/dataset/316831) | 316831 | `31-bryozoa` |
+| [Cnidaria](https://www.checklistbank.org/dataset/316839) | 316839 | `32-cnidaria` |
+| [Carpoids](https://www.checklistbank.org/dataset/316825) | 316825 | `33-carpoids` |
+| [Echiurans based on Murina](https://www.checklistbank.org/dataset/316823) | 316823 | `34-echiurans-based-on-murina` |
+| [Chapin, Birds of the Belgian Congo](https://www.checklistbank.org/dataset/316849) | 316849 | `35-chapin-birds-of-the-belgian-congo` |
+| [Hemichordata](https://www.checklistbank.org/dataset/316822) | 316822 | `41-hemichordata` |
+| [Entoprocta](https://www.checklistbank.org/dataset/316821) | 316821 | `42-entoprocta` |
+| [Sipunculids (based on Cutler)](https://www.checklistbank.org/dataset/316824) | 316824 | `43-sipunculids-based-on-cutler` |
+| [Rotifera](https://www.checklistbank.org/dataset/316827) | 316827 | `44-rotifera` |
+| [Nemertea](https://www.checklistbank.org/dataset/316820) | 316820 | `45-nemertea` |
+| [Onychophorans (Centre International de Myriapodologie)](https://www.checklistbank.org/dataset/316819) | 316819 | `49-onychophorans-centre-international-de-myriapodologie` |
+| [Trilobita](https://www.checklistbank.org/dataset/316836) | 316836 | `50-trilobita` |
+| [Coleoptera classification to subfamily](https://www.checklistbank.org/dataset/316828) | 316828 | `51-coleoptera-classification-to-subfamily` |
+| [Collembola (Janssens)](https://www.checklistbank.org/dataset/316842) | 316842 | `52-collembola-janssens` |
+| [Lepidoptera NHM](https://www.checklistbank.org/dataset/316853) | 316853 | `53-lepidoptera-nhm` |
+| [Apoidea to genera (Michener)](https://www.checklistbank.org/dataset/316829) | 316829 | `54-apoidea-to-genera-michener` |
+| [Tineidae (Lepidoptera) (Robinson)](https://www.checklistbank.org/dataset/316834) | 316834 | `55-tineidae-lepidoptera-robinson` |
+| [Howard and Moore, 3rd Edition](https://www.checklistbank.org/dataset/316852) | 316852 | `66-howard-and-moore-3rd-edition` |
+| [Mallophaga (suborders Amblycera, Ischnocera, and Rhynchophthirina)](https://www.checklistbank.org/dataset/316835) | 316835 | `76-mallophaga-suborders-amblycera-ischnocera-and-rhynchophthiri` |
+| [Cnidaria from Dr. Jacob van der Land](https://www.checklistbank.org/dataset/316846) | 316846 | `86-cnidaria-from-dr-jacob-van-der-land` |
+
 ## Mapping notes
 
 - **IDs**
