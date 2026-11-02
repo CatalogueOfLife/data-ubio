@@ -25,15 +25,7 @@ NOT_ZOOLOGICAL = {25, 29}
 GEO_SCOPE = {35: "Belgian Congo (Democratic Republic of the Congo)", 1: "North America", 2: "North America"}
 CREATORS = Path(__file__).resolve().parent.parent / "config" / "classification-creators.yaml"
 
-# preferred spelling of ranks when NameBank gives several for one name
-STANDARD_RANKS = [
-    "domain", "superkingdom", "kingdom", "subkingdom", "infrakingdom", "superphylum", "phylum", "subphylum",
-    "infraphylum", "division", "subdivision", "superclass", "class", "subclass", "infraclass", "parvclass",
-    "superorder", "order", "suborder", "infraorder", "parvorder", "superfamily", "family", "subfamily",
-    "supertribe", "tribe", "subtribe", "infratribe", "genus", "subgenus", "section", "subsection", "series",
-    "subseries", "species group", "species", "subspecies", "variety", "subvariety", "form", "subform",
-    "forma", "infraspecies", "cultivar", "strain",
-]
+RANKS = Path(__file__).resolve().parent.parent / "config" / "ranks.yaml"
 
 # cb.SynonymRelations.relationID -> (ColDP status or None to skip, remark or None, vernacular?)
 SYN_REL = {
@@ -82,30 +74,49 @@ def prepare_names(con: duckdb.DuckDBPyConnection) -> None:
     con.unregister("_sup")
     con.execute("CREATE OR REPLACE TEMP MACRO cur_id(x) AS coalesce((SELECT cur FROM nm_sup WHERE old = x), x)")
 
-    ranks = ", ".join(f"('{r}', {i})" for i, r in enumerate(STANDARD_RANKS))
-    con.execute(f"""
+    # uBio rank labels mapped with the ChecklistBank rank parser (config/ranks.yaml); unparsable labels -> NULL
+    with open(RANKS, encoding="utf-8") as f:
+        rcfg = yaml.safe_load(f)
+    labels = [(k, v) for k, v in rcfg["ranks"].items()]
+    con.register("_rm", pa.table({"label": [k for k, _ in labels], "rank": [v for _, v in labels]}))
+    con.execute("CREATE OR REPLACE TEMP TABLE rank_map AS SELECT * FROM _rm")
+    con.unregister("_rm")
+    con.register("_rl", pa.table({"rank": list(rcfg["levels"]), "level": list(rcfg["levels"].values())}))
+    con.execute("CREATE OR REPLACE TEMP TABLE rank_lvl AS SELECT * FROM _rl")
+    con.unregister("_rl")
+    con.execute("CREATE OR REPLACE TEMP MACRO map_rank(x) AS (SELECT rank FROM rank_map WHERE label = x)")
+    # 1 = genus and above, 2 = species, 3 = infraspecific; NULL = unknown
+    con.execute("CREATE OR REPLACE TEMP MACRO rank_level(r) AS (SELECT level FROM rank_lvl WHERE rank = r)")
+    # a name with several, conflicting ranks in NameBank gets none
+    con.execute("""
         CREATE OR REPLACE TEMP TABLE nm_rank AS
-        WITH std(rankName, prio) AS (VALUES {ranks})
-        SELECT nr.namebankID, arg_min(r.rankName, coalesce(std.prio, 1000) * 1000 + r.rankID) AS rank
-        FROM nb2.nameRanks nr JOIN nb2.ranks r USING (rankID) LEFT JOIN std ON lower(r.rankName) = std.rankName
-        GROUP BY 1""")
-    # rank level: 1 = genus and above, 2 = species, 3 = infraspecific; NULL = unknown
-    con.execute(r"""CREATE OR REPLACE TEMP MACRO rank_level(r) AS CASE
-        WHEN r IS NULL THEN NULL
-        WHEN lower(trim(r)) IN ('species', 'sp', 'sp.', 'spec', 'binomial', 'agsp') THEN 2
-        WHEN regexp_matches(lower(r), '^(sub-?species|subsp\.?|ssp\.?|var\.?|variety|subvariety|sub-?forma?|forma?|fo\.?|f\.?|infraspecies|infraspecific.*|trinomial|subspecific|race|morph|aberration|ab\.?)$') THEN 3
-        WHEN regexp_matches(lower(r), 'genus|^gen\.?$|famil|tribe|order|class|phylum|kingdom|division|section|^sect\.?$|series|domain|cohort') THEN 1
-        END""")
+        WITH m AS (
+            SELECT DISTINCT nr.namebankID, rm.rank
+            FROM nb2.nameRanks nr JOIN nb2.ranks r USING (rankID) JOIN rank_map rm ON rm.label = r.rankName
+            WHERE rm.rank IS NOT NULL)
+        SELECT namebankID,
+               CASE WHEN count(*) FILTER (WHERE rank <> 'infraspecific name') = 1
+                        THEN any_value(rank) FILTER (WHERE rank <> 'infraspecific name')
+                    WHEN count(*) FILTER (WHERE rank <> 'infraspecific name') = 0 THEN 'infraspecific name' END AS rank
+        FROM m GROUP BY 1""")
     con.execute("""CREATE OR REPLACE TEMP MACRO name_words(c) AS
         CASE WHEN c IS NULL OR trim(c) = '' THEN NULL ELSE len(string_split(trim(c), ' ')) END""")
-    # rank corrected when the canonical name has more parts than the rank allows
-    con.execute(r"""CREATE OR REPLACE TEMP MACRO final_rank(r, c, ns) AS CASE
-        WHEN rank_level(r) IS NULL OR rank_level(r) = 3 OR name_words(c) IS NULL OR name_words(c) <= rank_level(r) THEN r
-        WHEN name_words(c) = 2 THEN 'species'
-        WHEN regexp_matches(ns, '\svar\.?\s') THEN 'variety'
-        WHEN regexp_matches(ns, '\s(f|fo|forma)\.?\s') THEN 'form'
+    # rank given by a marker in the original name string
+    con.execute(r"""CREATE OR REPLACE TEMP MACRO marker_rank(ns) AS CASE
         WHEN regexp_matches(ns, '\s(subsp|ssp)\.?\s') THEN 'subspecies'
-        ELSE 'infraspecific name' END""")
+        WHEN regexp_matches(ns, '\svar\.?\s') THEN 'variety'
+        WHEN regexp_matches(ns, '\s(f|fo|forma)\.\s|\sforma\s') THEN 'form' END""")
+    # Final rank: a marker in the name wins; otherwise the given rank if it fits the number of name parts;
+    # trinomials in zoological lists are subspecies; anything uncertain is left out (ChecklistBank infers it).
+    con.execute("""CREATE OR REPLACE TEMP MACRO final_rank(r, c, ns, zoo) AS CASE
+        WHEN marker_rank(ns) IS NOT NULL AND coalesce(name_words(c), 3) >= 3 THEN marker_rank(ns)
+        -- truncated canonical with a single word after it: epithet or author? ("Balæna Mysticetus", "Epiodon Rafinesque")
+        WHEN name_words(c) < rank_level(r) AND starts_with(ns, c || ' ')
+             AND name_words(substr(ns, length(c) + 2)) = 1 THEN NULL
+        WHEN r IS NOT NULL AND (name_words(c) IS NULL OR rank_level(r) IS NULL OR rank_level(r) = 3
+                                OR name_words(c) <= rank_level(r)) THEN r
+        WHEN zoo AND name_words(c) = 3 THEN 'subspecies'
+        END""")
     # canonical form split off as scientificName, unless it is shorter than the rank implies: NameBank truncated
     # canonical forms of old names with capitalised epithets (e.g. "Balæna Mysticetus" -> "Balæna")
     con.execute("""CREATE OR REPLACE TEMP MACRO split_ok(r, c, ns) AS
@@ -293,17 +304,14 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
     con.execute("""CREATE OR REPLACE TEMP MACRO ref_list(a, b) AS
         nullif(array_to_string(list_sort(list_distinct(list_filter(string_split(concat_ws(',', a, b), ','), lambda x: x <> ''))), ','), '')""")
     zoological = cid not in NOT_ZOOLOGICAL
-    con.execute("""CREATE OR REPLACE TEMP MACRO zoo_rank(x) AS
-        CASE WHEN x = 'infraspecific name' THEN 'subspecies' ELSE x END""")
-    con.execute("CREATE OR REPLACE TEMP MACRO same_rank(x) AS x")
-    rank_fn = "zoo_rank" if zoological else "same_rank"
+    zoo = "true" if zoological else "false"
     code = "'zoological'" if zoological else "NULL"
     arc.write(con, "NameUsage", f"""
         SELECT CAST(t.ID AS VARCHAR) AS ID, 'ubio:' || t.ID AS nameAlternativeID,
                CAST(t.parentID AS VARCHAR) AS parentID, 'accepted' AS status,
-               sci_name(coalesce(r.rankName, n.rank), n.canonical, n.nameString) AS scientificName,
-               auth_name(coalesce(r.rankName, n.rank), n.canonical, n.nameString) AS authorship,
-               {rank_fn}(final_rank(coalesce(r.rankName, n.rank), n.canonical, n.nameString)) AS rank,
+               sci_name(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS scientificName,
+               auth_name(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString) AS authorship,
+               final_rank(coalesce(map_rank(r.rankName), n.rank), n.canonical, n.nameString, {zoo}) AS rank,
                {code} AS code,
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END AS nameReferenceID,
                ref_list(c.otherRefs, sr.refs) AS referenceID,
@@ -317,7 +325,7 @@ def export_classification(cid: int, keep: bool = False, archive_name: str | None
         UNION ALL
         SELECT 's' || s.synonymsID, 'ubio:' || s.nameID, CAST(s.acceptedID AS VARCHAR), s.status,
                sci_name(n.rank, n.canonical, n.nameString), auth_name(n.rank, n.canonical, n.nameString),
-               {rank_fn}(final_rank(n.rank, n.canonical, n.nameString)), {code},
+               final_rank(n.rank, n.canonical, n.nameString, {zoo}), {code},
                CASE WHEN c.bestID IS NOT NULL THEN 'c' || c.bestID END,
                ref_list(c.otherRefs, r.refs),
                n.extinct, s.remarks

@@ -120,7 +120,11 @@ Classifications transcribed by uBio (ClassificationBank id in the archive name):
   - About 7.8k names placed twice keep their first placement.
   - Parents missing from the classification are added as implied nodes (4,959) where the name exists. Nodes are re-attached to their nearest ancestor present in the ancestry path.
 - **Name split**: the NameBank canonical form gives `scientificName` and the rest of the string becomes `authorship`. Otherwise the full string is kept.
-- **Ranks**: when NameBank gives several ranks for a name, the standard rank name is preferred.
+- **Ranks:** a wrong rank is worse than none, so uncertain ranks are left out and ChecklistBank infers them from the name.
+  - uBio rank labels are mapped with ChecklistBank's rank parser into `config/ranks.yaml`. Unparsable, uncertain (`?var`) and ambiguous (`division`) labels map to nothing.
+  - A var./f./subsp. marker in the original name string decides the rank.
+  - A rank that contradicts the number of name parts (e.g. trinomials ranked species) is dropped. In the zoological lists, trinomials become subspecies.
+  - Names with conflicting ranks in NameBank get none.
 - **References**: NameBank citations become references.
   - `nameReferenceID` is only set when the citation year equals the year in the name.
   - All other citations go into `referenceID`, for placed taxa only.

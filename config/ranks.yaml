@@ -1,0 +1,645 @@
+# uBio rank labels (nb2.ranks) parsed with the ChecklistBank rank parser (/parser/rank).
+# null = unparsable or unranked: the rank is left out.
+ranks:
+  '"s"sp': subspecies
+  (Benth.) B.L. Turner: null
+  (Bogner) E.G. Gonç.: null
+  (DC.) Naudin: null
+  (Engelm.) Arthur: null
+  (Sprague) Nied.: null
+  (Stapf) Stapf: null
+  (unranked): null
+  '1': null
+  '10': null
+  '1980': null
+  '2': null
+  '3': null
+  '4': null
+  '5': null
+  '6': null
+  '7': null
+  '8': null
+  '9': null
+  '?': null
+  ?var: null
+  AF: null
+  AG: null
+  ASP: null
+  Alford: null
+  Apakšdzimta: null
+  Apakšklase: null
+  Apakštips: null
+  Apakštriba: null
+  Apakšģints: null
+  Aug 1899: null
+  Brooker: null
+  Confer species: null
+  Confer subspecies: null
+  Dzimta: null
+  Espéce: species
+  F. Muell.: null
+  Gruppe: null
+  Gómez-Sosa: null
+  I: null
+  II: null
+  Infraklase: null
+  Infrakārta: null
+  Infraordo: infraorder
+  Ismscher: null
+  Klase: null
+  Koch: null
+  Kārta: null
+  L.  fo. guadalupensis: null
+  L. x: null
+  Lunell: null
+  Mears: null
+  Meisn.: null
+  NO RANK: null
+  NRA: null
+  Nees ex Steud. ex Jacks.: null
+  Oliv. & Hiern: null
+  Oudej: null
+  Pasuga: null
+  RANK?: null
+  Rasse: proles
+  Reihe: null
+  Ruiz: null
+  SP: species
+  Sekcija: null
+  Stirp: null
+  Suga: null
+  Sērija: null
+  Tips: null
+  Triba: null
+  Tribgen: null
+  Unspecified: null
+  Unterguppe: null
+  Virsdzimta: null
+  Virsklase: null
+  Virskārta: null
+  Warb.: null
+  a: null
+  a.: null
+  ab.: aberration
+  aberration: aberration
+  above family: null
+  aggr.: species aggregate
+  aggregate: species aggregate
+  agsp: null
+  approaching: null
+  art: species
+  b.: null
+  binomial: null
+  biovar: biovar
+  branch: null
+  c.: class
+  carstvo: null
+  cl.: class
+  clase: class
+  class: class
+  classe: class
+  classis: class
+  cluster: null
+  cohors: cohort
+  cohort: cohort
+  complex: species aggregate
+  con-variety: convariety
+  convar: convariety
+  convar.: convariety
+  convarietas: convariety
+  convariety: convariety
+  cor: null
+  cultivar: cultivar
+  cultivar group: cultivar group
+  cv: cultivar
+  cv.: cultivar
+  d: null
+  deblo: null
+  divis: null
+  divisio: null
+  division: null
+  diviso: null
+  domain: domain
+  druzina: null
+  e: null
+  ecad: null
+  embranchement: null
+  empire: empire
+  especie: species
+  f: form
+  f.: form
+  f. s: null
+  f. spec.: null
+  f.sp.: forma specialis
+  fam: family
+  fam.: family
+  famfam: null
+  famgen: null
+  familia: family
+  familie: family
+  familio: null
+  famille: family
+  family: family
+  family group: null
+  famsp: null
+  filo: phylum
+  flus: null
+  fo: null
+  fogen: null
+  form: form
+  forma: form
+  forma spec.: null
+  fosp: null
+  g: genus
+  gattung: genus
+  gen: genus
+  gen.: genus
+  genere: null
+  genre: genus
+  genro: null
+  genus: genus
+  genus group: null
+  giga-order: gigaorder
+  gigaorder: gigaorder
+  gr. var: null
+  grade: null
+  grand-order: grandorder
+  grandorder: grandorder
+  grex: grex
+  group: species aggregate
+  groupa: null
+  groupe: null
+  grupo: null
+  género: genus
+  hirta: null
+  hort. fo: null
+  hybrid: null
+  hyper-order: mirorder
+  hyperorder: mirorder
+  incertae cedis: null
+  incertae sedis: null
+  infra-class: infraclass
+  infra-cohort: infracohort
+  infra-domain: infradomain
+  infra-family: infrafamily
+  infra-form: null
+  infra-genus: infragenus
+  infra-kingdom: infrakingdom
+  infra-legion: infralegion
+  infra-order: infraorder
+  infra-phylum: infraphylum
+  infra-section: null
+  infra-series: null
+  infra-species: infraspecific name
+  infra-tribe: infratribe
+  infra-variety: null
+  infraclass: infraclass
+  infraclassis: infraclass
+  infracohort: infracohort
+  infradomain: infradomain
+  infrafamily: infrafamily
+  infraform: null
+  infragenus: infragenus
+  infrakingdom: infrakingdom
+  infralegion: infralegion
+  infraorder: infraorder
+  infraphylum: infraphylum
+  infraregnum: infrakingdom
+  infrasection: null
+  infraseries: null
+  infraspecies: infraspecific name
+  infratribe: infratribe
+  infratribus: null
+  infravariety: null
+  inter-kingdom: null
+  interkingdom: null
+  kingdom: kingdom
+  klasse: class
+  kohorta: null
+  koljeno: null
+  kraljestvo: null
+  legion: legion
+  lus: null
+  lusus: lusus
+  magnorder: magnorder
+  mega-order: magnorder
+  megaorder: magnorder
+  mf: null
+  micro-species: null
+  microgen: infrageneric name
+  microsp.: null
+  microspecies: null
+  mid-kingdom: null
+  mid-phylum: null
+  midkingdom: null
+  midphylum: null
+  mir-order: mirorder
+  mirorder: mirorder
+  mnstr: null
+  modification: null
+  mon: null
+  monster: null
+  monstr: null
+  morph: morph
+  mstr: null
+  mstr.: null
+  mut: mutatio
+  mut.: mutatio
+  mutant: null
+  mutation: null
+  nadred: null
+  nadrod: null
+  nadvrsta: null
+  natkohorta: null
+  natkoljeno: null
+  natporodica: null
+  near: null
+  nm: null
+  nm.: null
+  nodaļa: null
+  nohtosubsp: null
+  nopthosubsp: null
+  not specified: null
+  notho morph: null
+  notho species: species
+  nothof: form
+  nothogen: null
+  nothomorph: null
+  nothosect: section botany
+  nothoser: series botany
+  nothosubg: null
+  nothosubgeen: null
+  nothosubgen: subgenus
+  nothosubsp: subspecies
+  nothosupsp: null
+  nothovar: variety
+  nothsect: null
+  nr.: null
+  nrasp: null
+  nssp: null
+  nsubsp: null
+  o: order
+  oblvar: null
+  oec: null
+  opiz: null
+  ord: order
+  ordem: order
+  orden: order
+  order: order
+  ordnung: order
+  ordo: order
+  ordord: null
+  ordre: order
+  par: null
+  pars: null
+  parv-class: parvclass
+  parv-order: parvorder
+  parvclass: parvclass
+  parvorder: parvorder
+  phly.: null
+  phylum: phylum
+  poddeblo: null
+  podrazred: null
+  podred: null
+  podrod: null
+  podtribus: null
+  podvrsta: null
+  porodica: null
+  potcarstvo: null
+  potkoljeno: null
+  potporodica: null
+  prol: proles
+  prole: proles
+  proles: proles
+  pv.: pathovar
+  quadrinomial: null
+  rac: null
+  race: proles
+  razred: null
+  red: null
+  reg.: kingdom
+  regnum: kingdom
+  reino: kingdom
+  rod: null
+  rouy: null
+  s: species
+  sabgen: null
+  sbsp: null
+  sebsp: null
+  sect: section botany
+  sect.: section botany
+  sectgen: null
+  sectio: section botany
+  section: section botany
+  sectsp: null
+  ser: series botany
+  ser.: series botany
+  seria: null
+  serie: series botany
+  series: series botany
+  serovar: serovar
+  set: null
+  sf: null
+  sg: null
+  sous-famille: null
+  sous-ordre: null
+  sp.: species
+  sp.-group: null
+  species: species
+  species forma: null
+  species group: species aggregate
+  species subgroup: species aggregate
+  specio: null
+  sport: null
+  sre: null
+  ssp: subspecies
+  ssp.: subspecies
+  stirps: infrageneric name
+  strain: strain
+  sub: null
+  sub-class: subclass
+  sub-cohort: subcohort
+  sub-division: subdivision
+  sub-domain: subdomain
+  sub-family: subfamily
+  sub-form: subform
+  sub-forma: subform
+  sub-genus: subgenus
+  sub-group: null
+  sub-kingdom: subkingdom
+  sub-legion: sublegion
+  sub-order: suborder
+  sub-phylum: subphylum
+  sub-section: subsection botany
+  sub-series: subseries botany
+  sub-species: subspecies
+  sub-tribe: subtribe
+  sub-variety: subvariety
+  sub.reg: subkingdom
+  subap: null
+  subcalssis: null
+  subcl.: subclass
+  subclass: subclass
+  subclassis: subclass
+  subcohort: subcohort
+  subdiv: subdivision
+  subdivisio: subdivision
+  subdivision: subdivision
+  subdomain: subdomain
+  subf: subform
+  subf.: subform
+  subfam: subfamily
+  subfam.: subfamily
+  subfamgen: null
+  subfamilia: subfamily
+  subfamily: subfamily
+  subfamily group: null
+  subfamsp: null
+  subfilo: null
+  subfo: null
+  subform: subform
+  subfsp: null
+  subgen: subgenus
+  subgen.: subgenus
+  subgenere: null
+  subgengen: null
+  subgenus: subgenus
+  subgroup: null
+  subkingdom: subkingdom
+  sublegion: sublegion
+  subord: suborder
+  suborder: suborder
+  subordo: suborder
+  subphylum: subphylum
+  subregnum: subkingdom
+  subreino: null
+  subs: null
+  subsect: subsection botany
+  subsect.: subsection botany
+  subsectio: subsection botany
+  subsection: subsection botany
+  subser: subseries botany
+  subser.: subseries botany
+  subseries: subseries botany
+  subset: null
+  subsp: subspecies
+  subsp.: subspecies
+  subspecies: subspecies
+  subspecific: null
+  subspsp: null
+  substirps: null
+  subtr: null
+  subtrib: subtribe
+  subtrib.: subtribe
+  subtribe: subtribe
+  subtribegen: null
+  subtribgen: null
+  subtribsp: null
+  subtribu: null
+  subtribus: subtribe
+  subv: null
+  subvar: subvariety
+  subvar.: subvariety
+  subvar. [?]: subvariety
+  subvarietas: subvariety
+  subvariety: subvariety
+  subvarsp: null
+  sufam: null
+  suhsp: null
+  super-class: superclass
+  super-cohort: supercohort
+  super-division: superdivision
+  super-domain: superdomain
+  super-family: superfamily
+  super-genus: supergenus
+  super-kingdom: superkingdom
+  super-legion: superlegion
+  super-order: superorder
+  super-phylum: superphylum
+  super-section: supersection botany
+  super-series: superseries botany
+  super-species: species aggregate
+  super-tribe: supertribe
+  super-variety: supervariety
+  superclase: null
+  superclass: superclass
+  superclassis: superclass
+  supercohors: null
+  supercohort: supercohort
+  superdivision: superdivision
+  superdomain: superdomain
+  superfamilia: null
+  superfamilio: null
+  superfamille: null
+  superfamily: superfamily
+  superform: superform
+  supergenus: supergenus
+  superkingdom: superkingdom
+  superlegion: superlegion
+  superorden: null
+  superorder: superorder
+  superordo: superorder
+  superordsp: null
+  superphylum: superphylum
+  supersect: supersection botany
+  supersection: supersection botany
+  superseries: superseries botany
+  superspecies: species aggregate
+  supertrib: supertribe
+  supertribe: supertribe
+  supervariety: supervariety
+  supra-kingdom: null
+  supra-phylum: null
+  suprakingdom: null
+  supraphylum: null
+  supsp: null
+  susbp: subspecies
+  susbsp: null
+  susp: null
+  t.i: null
+  tax: null
+  trib: tribe
+  trib.: tribe
+  tribe: tribe
+  tribsp: null
+  tribus: tribe
+  trinomial: null
+  type: null
+  typus: null
+  unknown: null
+  unranked: null
+  unranked taken from Presl. Not related to A. magel: null
+  unrankedgen: null
+  unrankedsp: null
+  unterart: subspecies
+  untergattung: null
+  unterordnung: null
+  var: variety
+  var.: variety
+  vargen: null
+  variant: null
+  variatio: null
+  varietas: variety
+  variety: variety
+  varsp: null
+  vel: null
+  vrsta: null
+  xxx: null
+  überfamilie: null
+  Ģints: null
+  Класс: null
+  Надотряд: null
+  Надсемейство: null
+  Отряд: null
+  Подкласс: null
+  Подсемейство: null
+  Род: null
+  Семейство: null
+  Триба: null
+  上目: null
+  上科: null
+  上種: null
+  上綱: null
+  上門: null
+  亜属: null
+  亜界: null
+  亜目: null
+  亜科: null
+  亜種: null
+  亜綱: null
+  亜門: null
+  列: null
+  変: null
+  属: genus
+  株: null
+  特別品種: null
+  界: kingdom
+  目: order
+  種: species
+  突然変異体: null
+  節: null
+  連: null
+  門: null
+  雑種: null
+levels:
+  superdomain: 1
+  domain: 1
+  subdomain: 1
+  infradomain: 1
+  empire: 1
+  superkingdom: 1
+  kingdom: 1
+  subkingdom: 1
+  infrakingdom: 1
+  superphylum: 1
+  phylum: 1
+  subphylum: 1
+  infraphylum: 1
+  superclass: 1
+  class: 1
+  subclass: 1
+  infraclass: 1
+  parvclass: 1
+  superdivision: 1
+  division zoology: 1
+  subdivision: 1
+  superlegion: 1
+  legion: 1
+  sublegion: 1
+  infralegion: 1
+  supercohort: 1
+  cohort: 1
+  subcohort: 1
+  infracohort: 1
+  gigaorder: 1
+  magnorder: 1
+  grandorder: 1
+  mirorder: 1
+  superorder: 1
+  order: 1
+  suborder: 1
+  infraorder: 1
+  parvorder: 1
+  superfamily: 1
+  family: 1
+  subfamily: 1
+  infrafamily: 1
+  supertribe: 1
+  tribe: 1
+  subtribe: 1
+  infratribe: 1
+  supergenus: 1
+  genus: 1
+  subgenus: 1
+  infragenus: 1
+  supersection botany: 1
+  section botany: 1
+  subsection botany: 1
+  superseries botany: 1
+  series botany: 1
+  subseries botany: 1
+  infrageneric name: 1
+  species aggregate: 2
+  species: 2
+  infraspecific name: 3
+  grex: 3
+  subspecies: 3
+  cultivar group: 3
+  convariety: 3
+  proles: 3
+  aberration: 3
+  morph: 3
+  supervariety: 3
+  variety: 3
+  subvariety: 3
+  superform: 3
+  form: 3
+  subform: 3
+  pathovar: 3
+  biovar: 3
+  serovar: 3
+  forma specialis: 3
+  lusus: 3
+  cultivar: 3
+  mutatio: 3
+  strain: 3
