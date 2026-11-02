@@ -25,12 +25,15 @@ license: CC-BY-4.0
 creator:
   - given: David
     family: Remsen
+    orcid: 0000-0003-1289-0840
   - given: Patrick
     family: Leary
+    orcid: 0000-0001-5172-8577
   - given: Catherine
     family: Norton
   - given: Dmitry
     family: Mozzherin
+    orcid: 0000-0003-1593-1417
 publisher:
   organisation: uBio, MBLWHOI Library, Marine Biological Laboratory
   city: Woods Hole
@@ -48,7 +51,8 @@ conversion:
     Converted with a Python and DuckDB script from the November 2015 MySQL dump of the uBio databases. The uBiota
     classification (ClassificationBank 104) provides the accepted taxa, after repairing duplicate placements and
     missing parents. All other NameBank scientific names are added as bare names. Superseded NameBank records are
-    redirected to their current identifier. Vernacular names are kept only for taxa in uBiota. Misspelling, lexical-
-    variant and basionym groups become name relations, and external database mappings become alternative
-    identifiers.
+    redirected to their current identifier. ColDP requires a vernacular name to be linked to a taxon, so vernacular
+    names are only included for taxa in uBiota. About 810,000 NameBank vernacular names whose scientific name is not
+    part of the uBiota tree were dropped. Misspelling, lexical-variant and basionym groups become name relations,
+    and external database mappings become alternative identifiers.
   url: https://github.com/CatalogueOfLife/data-ubio
